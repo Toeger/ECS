@@ -16,7 +16,7 @@ namespace ECS{
 	System keeps the components of all Entitys in a vector per component type and allows to iterate over Entitys with specified components.
 	You only use System to iterate. Use Entitys to add components.
 	Limitations:
-		Cannot have multiple components of the same type in one Entity. You can get around that with an array or vector of components
+		Cannot have multiple components of the same type in one Entity. You can get around that with an array or vector of components.
 	*/
 	struct System{
 		template<class Component>
