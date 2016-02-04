@@ -3,7 +3,6 @@
 
 #include <cmath>
 #include <limits>
-#include <SFML/Graphics.hpp>
 #include <type_traits>
 
 namespace Utility {
