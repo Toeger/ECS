@@ -68,12 +68,13 @@ namespace ECS{
 			//a struct to remove a component. This is unfortunately necessary, because entities don't know the types of their components
 			struct Remover{
 				Remover(Impl::Id id, void (*f)(Impl::Id))
-					:id(id)
-					,f(f)
+					:f(f)
+					,id(id)
 				{}
 				Remover(Remover &&other) noexcept
-					:id(other.id)
-					,f(other.f){
+					:f(other.f)
+					,id(other.id)
+				{
 					other.f = remover_dummy;
 				}
 				Remover &operator = (Remover &&other) noexcept{
@@ -96,8 +97,8 @@ namespace ECS{
 				}
 			private:
 				//data
-				Impl::Id id;
 				void (*f)(Impl::Id);
+				Impl::Id id;
 				//empty function to put into removers that have been moved from
 				static inline void remover_dummy(Impl::Id){}
 			};

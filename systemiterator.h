@@ -104,6 +104,9 @@ namespace ECS{
 			v.push_back(t.get_id());
 			return v;
 		}
+		ECS::Entity_handle get_entity_handle(){
+			return t.get_entity_handle();
+		}
 
 	private:
 		System_iterator<T> t;
