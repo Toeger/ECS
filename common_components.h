@@ -2,6 +2,7 @@
 #define COMMON_COMPONENTS_H
 
 #include "Graphics/animations.h"
+
 #include <chrono>
 
 namespace Common_components{

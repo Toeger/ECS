@@ -1,8 +1,8 @@
 #ifndef SYSTEMITERATOR_H
 #define SYSTEMITERATOR_H
 
-#include "system.h"
 #include "entity_handle.h"
+#include "system.h"
 
 namespace ECS{
 	/*
