@@ -4,6 +4,7 @@
 #include <cmath>
 #include <limits>
 #include <type_traits>
+#include <utility>
 
 namespace Utility {
 	template <class T>
@@ -12,8 +13,8 @@ namespace Utility {
 		return t;
 	}
 
-	template<class T, size_t size>
-	constexpr size_t element_count(const T (&)[size]){
+	template<class T, std::size_t size>
+	constexpr std::size_t element_count(const T (&)[size]){
 		return size;
 	}
 
