@@ -27,6 +27,7 @@ namespace Common_components{
 	};
 	//Tags
 	struct Enemy{}; //set for all targetable enemies
+	struct Map{}; //set for the map the player is playing on
 }
 
 #endif // COMMON_COMPONENTS_H
