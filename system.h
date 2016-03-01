@@ -89,6 +89,7 @@ namespace ECS{
 template <class Component>
 ECS::Entity_handle ECS::System::component_to_entity_handle(const Component &component){
 	auto &components = get_components<Component>();
+	assert_fast(components.size());
 	assert_fast(&components.front() <= &component);
 	assert_fast(&components.back() >= &component);
 	auto index = &component - &components.front();
