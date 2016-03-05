@@ -1,8 +1,6 @@
 #ifndef COMMON_COMPONENTS_H
 #define COMMON_COMPONENTS_H
 
-#include "Graphics/animations.h"
-
 #include <chrono>
 
 namespace Common_components{
@@ -20,14 +18,10 @@ namespace Common_components{
 	struct Life_time{
 		int life_time; //in logical frames left
 	};
-	struct Animation{
-		Animations::Animation animation;
-		sf::Color color = sf::Color::White;
-		float start_frame = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() % 1000 / 1000.f;
-	};
 	//Tags
 	struct Enemy{}; //set for all targetable enemies
 	struct Map{}; //set for the map the player is playing on
+	struct Run_straight_AI{};
 }
 
 #endif // COMMON_COMPONENTS_H
