@@ -35,7 +35,6 @@ namespace ECS{
 		static Entity_handle component_to_entity_handle(const Component &component);
 		//list of systems that modify the world
 		static std::vector<std::function<void()>> &get_systems(){
-			static std::vector<std::function<void()>> systems; //could possibly get around using std::function, but it is hard and not worth it
 			return systems;
 		}
 		//run all systems
@@ -74,6 +73,7 @@ namespace ECS{
 		static std::vector<Impl::Id> ids;
 		/* TODO: could make components and ids use the same memory since they reallocate at the same time, but this only saves a few memory allocations
 		   and is probably not worth it */
+		static std::vector<std::function<void()>> systems; //could possibly get around using std::function, but it is hard and not worth it
 	};
 	template<class Component>
 	std::vector<Component> ECS::System::components{};
@@ -102,6 +102,5 @@ ECS::System_iterator<Components...> ECS::System::range(){
 	si.advance(0);
 	return si;
 }
-
 
 #endif // SYSTEM_H
