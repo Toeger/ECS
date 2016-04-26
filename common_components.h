@@ -3,25 +3,24 @@
 
 #include <chrono>
 
-namespace Common_components{
-	struct Speed{
+namespace Common_components {
+	struct Speed {
 		float speed;
 	};
-	struct HP{
+	struct HP {
 		HP(int hp)
-			:hp(hp)
-			,max_hp(hp)
-		{}
+			: hp(hp)
+			, max_hp(hp) {}
 		int hp;
 		int max_hp;
 	};
-	struct Life_time{
+	struct Life_time {
 		int life_time; //in logical frames left
 	};
 	//Tags
-	struct Enemy{}; //set for all targetable enemies
-	struct Map{}; //set for the map the player is playing on
-	struct Run_straight_AI{};
+	struct Enemy {}; //set for all targetable enemies
+	struct Map {};   //set for the map the player is playing on
+	struct Run_straight_AI {};
 }
 
 #endif // COMMON_COMPONENTS_H

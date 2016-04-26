@@ -1,59 +1,56 @@
 #ifndef ENTITY_BASE_H
 #define ENTITY_BASE_H
 
-#include "ecs_impl.h"
 #include "Utility/asserts.h"
+#include "ecs_impl.h"
 
 #include <algorithm>
 #include <tuple>
 #include <vector>
 
-namespace ECS{
+namespace ECS {
 	//an Entity can have any type of component added to it
 	//note that you cannot add multiple components with the same type, use vector<component> or array<component> to get around that
 
-	namespace Impl{
-		struct Entity_base
-		{
+	namespace Impl {
+		struct Entity_base {
 			Entity_base(Impl::Id id)
-				:id(id)
-			{}
-			Entity_base(Entity_base &&other) noexcept
-				:id(other.id)
-			{
+				: id(id) {}
+			Entity_base(Entity_base &&other) noexcept : id(other.id) {
 				other.id = max_id;
 			}
-			Entity_base &operator =(Entity_base &&other) noexcept{
+			Entity_base &operator=(Entity_base &&other) noexcept {
 				std::swap(id, other.id);
 				return *this;
 			}
 			~Entity_base() = default;
 
 			//emplace a component into an Entity
-			template<class Component, class... Args>
+			template <class Component, class... Args>
 			Component &emplace(Args &&... args);
 			//add a component to an Entity
-			template<class Component>
-			Component &add(Component &&c){
+			template <class Component>
+			Component &add(Component &&c) {
 				return emplace<Component>(std::forward<Component>(c));
 			}
 			//get the component of a given type or nullptr if the Entity has no such component
-			template<class Component>
+			template <class Component>
 			Component *get();
 			//remove a component of a given type, UB if the entity has no such component, test with get to check if the entity has that component
-			template<class Component>
+			template <class Component>
 			void remove();
 			//check if the entity is valid. An entity becomes invalid when it is moved from
-			bool is_valid() const{
+			bool is_valid() const {
 				return id != max_id;
 			}
-		private:
+
+				private:
 			//remove a component of the given type and id
 			template <class Component>
 			static void remover(Impl::Id id);
 
 			template <class Component>
-			void add_remover(){
+			void add_remover() {
 				Remover r(id, remover<Component>);
 				auto pos = std::lower_bound(begin(removers), end(removers), r);
 				removers.insert(pos, std::move(r));
@@ -61,56 +58,53 @@ namespace ECS{
 			}
 
 			template <class Component>
-			void remove_remover(std::size_t index){
+			void remove_remover(std::size_t index) {
 				removers.erase(begin(removers) + index);
 			}
 
 			//a struct to remove a component. This is unfortunately necessary, because entities don't know the types of their components
-			struct Remover{
+			struct Remover {
 				Remover(Impl::Id id, void (*f)(Impl::Id))
-					:f(f)
-					,id(id)
-				{}
-				Remover(Remover &&other) noexcept
-					:f(other.f)
-					,id(other.id)
-				{
+					: f(f)
+					, id(id) {}
+				Remover(Remover &&other) noexcept : f(other.f), id(other.id) {
 					other.f = remover_dummy;
 				}
-				Remover &operator = (Remover &&other) noexcept{
+				Remover &operator=(Remover &&other) noexcept {
 					using std::swap;
 					swap(id, other.id);
 					swap(f, other.f);
 					return *this;
 				}
-				~Remover(){
+				~Remover() {
 					f(id);
 				}
-				bool operator <(const Remover &other) const{
+				bool operator<(const Remover &other) const {
 					return std::tie(id, f) < std::tie(other.id, other.f);
 				}
-				bool operator <(Impl::Id other_id) const{
+				bool operator<(Impl::Id other_id) const {
 					return id < other_id;
 				}
-				bool operator >(Impl::Id other_id) const{
+				bool operator>(Impl::Id other_id) const {
 					return id > other_id;
 				}
-			private:
+
+					private:
 				//data
 				void (*f)(Impl::Id);
 				Impl::Id id;
 				//empty function to put into removers that have been moved from
-				static inline void remover_dummy(Impl::Id){}
+				static inline void remover_dummy(Impl::Id) {}
 			};
 			//it is important that removers is cleared before the system component vectors are destroyed
 			//it is also necessary to have removers be destroyed after all entities, because entities access removers in the destructor, don't know how to do that without leaking removers
-		protected:
+				protected:
 			static Impl::Id id_counter;
 			Impl::Id id;
 			static std::vector<Remover> removers;
-			friend bool operator <(Impl::Id id, const Entity_base::Remover &r);
+			friend bool operator<(Impl::Id id, const Entity_base::Remover &r);
 		};
-		inline bool operator <(Impl::Id id, const Entity_base::Remover &r){
+		inline bool operator<(Impl::Id id, const Entity_base::Remover &r) {
 			return r > id;
 		}
 	}
@@ -118,11 +112,11 @@ namespace ECS{
 
 #include "system.h"
 
-namespace ECS{
-	namespace Impl{
+namespace ECS {
+	namespace Impl {
 		//emplace a component into an Entity
-		template<class Component, class... Args>
-		Component &Entity_base::emplace(Args &&... args){
+		template <class Component, class... Args>
+		Component &Entity_base::emplace(Args &&... args) {
 			auto &ids = System::get_ids<Component>();
 			auto &components = System::get_components<Component>();
 			auto insert_position = std::lower_bound(begin(ids), end(ids), id);
@@ -134,8 +128,8 @@ namespace ECS{
 			return *inserted_component;
 		}
 		//get the component of a given type or nullptr if the Entity has no such component
-		template<class Component>
-		Component *Entity_base::get(){
+		template <class Component>
+		Component *Entity_base::get() {
 			auto &ids = System::get_ids<Component>();
 			auto id_it = lower_bound(begin(ids), end(ids), id);
 			if (*id_it != id)
@@ -145,8 +139,8 @@ namespace ECS{
 			return &components.at(pos);
 		}
 		//remove a component of a given type, UB if the entity has no such component, test with get to check if the entity has that component
-		template<class Component>
-		void Entity_base::remove(){
+		template <class Component>
+		void Entity_base::remove() {
 			auto &ids = System::get_ids<Component>();
 			auto id_pos = lower_bound(begin(ids), end(ids), id);
 			assert_fast(id_pos != end(ids));
@@ -154,7 +148,7 @@ namespace ECS{
 		}
 		//remove a component of the given type and id
 		template <class Component>
-		void Entity_base::remover(Impl::Id id){
+		void Entity_base::remover(Impl::Id id) {
 			auto &ids = System::get_ids<Component>();
 			auto id_it = lower_bound(begin(ids), end(ids), id);
 			assert_fast(*id_it == id); //make sure the component to remove exists
