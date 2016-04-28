@@ -1,12 +1,14 @@
 #ifndef ENTITY_BASE_H
 #define ENTITY_BASE_H
 
+#include "ECS/log.h"
 #include "Utility/asserts.h"
 #include "ecs_impl.h"
 
 #include <algorithm>
 #include <tuple>
 #include <vector>
+#include <typeinfo>
 
 namespace ECS {
 	//an Entity can have any type of component added to it
@@ -51,7 +53,7 @@ namespace ECS {
 
 			template <class Component>
 			void add_remover() {
-				Remover r(id, remover<Component>);
+				Remover r(id, remover<Component>, typeid (Component).name());
 				auto pos = std::lower_bound(begin(removers), end(removers), r);
 				removers.insert(pos, std::move(r));
 				assert_all(std::is_sorted(begin(removers), end(removers)));
@@ -64,20 +66,27 @@ namespace ECS {
 
 			//a struct to remove a component. This is unfortunately necessary, because entities don't know the types of their components
 			struct Remover {
-				Remover(Impl::Id id, void (*f)(Impl::Id))
+				Remover(Impl::Id id, void (*f)(Impl::Id), const char *type_name)
 					: f(f)
-					, id(id) {}
-				Remover(Remover &&other) noexcept : f(other.f), id(other.id) {
+					, id(id)
+				, type_name(type_name){
+					Log::log_debug() << "++++++++Create remover for " << id << " of type " << type_name;
+				}
+				Remover(Remover &&other) noexcept : f(other.f), id(other.id), type_name(other.type_name) {
 					other.f = remover_dummy;
 				}
 				Remover &operator=(Remover &&other) noexcept {
 					using std::swap;
 					swap(id, other.id);
 					swap(f, other.f);
+					swap(type_name, other.type_name);
 					return *this;
 				}
 				~Remover() {
-					f(id);
+					if (f != remover_dummy) {
+						Log::log_debug() << "--------------------Remove " << id << " of type " << type_name;
+						f(id);
+					}
 				}
 				bool operator<(const Remover &other) const {
 					return std::tie(id, f) < std::tie(other.id, other.f);
@@ -93,6 +102,7 @@ namespace ECS {
 				//data
 				void (*f)(Impl::Id);
 				Impl::Id id;
+				const char *type_name;
 				//empty function to put into removers that have been moved from
 				static inline void remover_dummy(Impl::Id) {}
 			};

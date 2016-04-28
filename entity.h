@@ -22,7 +22,7 @@ namespace ECS {
 	//note that you cannot add multiple components with the same type, use vector<component> or array<component> to get around that
 	struct Entity : private Impl::Entity_base {
 		Entity()
-			: Entity_base(id_counter++) {}
+			: Entity_base(++id_counter) {}
 		Entity(Entity &&other) noexcept : Entity_base(std::move(other)) {}
 		Entity &operator=(Entity &&other) noexcept {
 			std::swap(id, other.id);
@@ -70,15 +70,15 @@ namespace ECS {
 			: function(other.function)
 			, entity(std::move(other.entity)) {
 			assert_fast(this->function);
-			//assert_fast(this->entity.is_valid());
+			assert_fast(this->entity.is_valid());
 		}
 		//Remove_checker &operator =(Remove_checker &&) = default;
 		Remove_checker &operator=(Remove_checker &&other) {
-			//assert_fast(other.entity.is_valid());
+			assert_fast(other.entity.is_valid());
 			std::swap(entity, other.entity);
 			std::swap(function, other.function);
 			assert_fast(this->function);
-			//assert_fast(this->entity.is_valid());
+			assert_fast(this->entity.is_valid());
 			return *this;
 		}
 		bool (*function)(Entity_handle);
