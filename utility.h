@@ -48,9 +48,9 @@ namespace Utility {
 	RAII<Function> create_RAII(Function &&f) {
 		return RAII<remove_cvr<Function>>(std::forward<Function>(f));
 	}
-#define CAT(a, b) CAT_(a, b) // force expand
-#define CAT_(a, b) a##b      // actually concatenate
-#define ON_SCOPE_EXIT(CODE) auto CAT(ON_SCOPE_EXIT_, __LINE__) = Utility::create_RAII([&]() { CODE })
+#define ON_SCOPE_EXIT_CAT(a, b) ON_SCOPE_EXIT_CAT_(a, b) // force expand
+#define ON_SCOPE_EXIT_CAT_(a, b) a##b                    // actually concatenate
+#define ON_SCOPE_EXIT(CODE) auto ON_SCOPE_EXIT_CAT(ON_SCOPE_EXIT_, __LINE__) = Utility::create_RAII([&]() { CODE })
 }
 
 #endif // UTILITY
