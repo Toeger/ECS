@@ -7,8 +7,8 @@
 
 #include <algorithm>
 #include <tuple>
-#include <vector>
 #include <typeinfo>
+#include <vector>
 
 namespace ECS {
 	//an Entity can have any type of component added to it
@@ -53,7 +53,7 @@ namespace ECS {
 
 			template <class Component>
 			void add_remover() {
-				Remover r(id, remover<Component>, typeid (Component).name());
+				Remover r(id, remover<Component>, typeid(Component).name());
 				auto pos = std::lower_bound(begin(removers), end(removers), r);
 				removers.insert(pos, std::move(r));
 				assert_all(std::is_sorted(begin(removers), end(removers)));
@@ -69,7 +69,7 @@ namespace ECS {
 				Remover(Impl::Id id, void (*f)(Impl::Id), const char *type_name)
 					: f(f)
 					, id(id)
-				, type_name(type_name){
+					, type_name(type_name) {
 					Log::log_debug() << "++++++++Create remover for " << id << " of type " << type_name;
 				}
 				Remover(Remover &&other) noexcept : f(other.f), id(other.id), type_name(other.type_name) {
