@@ -5,6 +5,8 @@
 
 namespace Common_components {
 	struct Speed {
+		Speed(float speed)
+			: speed(speed) {}
 		float speed;
 	};
 	struct HP {
