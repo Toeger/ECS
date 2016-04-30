@@ -30,9 +30,9 @@ namespace ECS {
 
 			//emplace a component into an Entity
 			template <class Component, class... Args>
-			std::enable_if_t<std::is_pod<Component>::value, Component &>emplace(Args &&... args);
+			std::enable_if_t<std::is_pod<Component>::value, Component &> emplace(Args &&... args);
 			template <class Component, class... Args>
-			std::enable_if_t<!std::is_pod<Component>::value, Component &>emplace(Args &&... args);
+			std::enable_if_t<!std::is_pod<Component>::value, Component &> emplace(Args &&... args);
 			//add a component to an Entity
 			template <class Component>
 			Component &add(Component &&c) {
@@ -129,7 +129,7 @@ namespace ECS {
 	namespace Impl {
 		//emplace a component into an Entity
 		template <class Component, class... Args>
-		std::enable_if_t<std::is_pod<Component>::value, Component &>Entity_base::emplace(Args &&... args) {
+		std::enable_if_t<std::is_pod<Component>::value, Component &> Entity_base::emplace(Args &&... args) {
 			auto &ids = System::get_ids<Component>();
 			auto &components = System::get_components<Component>();
 			auto insert_position = std::lower_bound(begin(ids), end(ids), id);
@@ -142,7 +142,7 @@ namespace ECS {
 		}
 		//emplace a component into an Entity
 		template <class Component, class... Args>
-		std::enable_if_t<!std::is_pod<Component>::value, Component &>Entity_base::emplace(Args &&... args) {
+		std::enable_if_t<!std::is_pod<Component>::value, Component &> Entity_base::emplace(Args &&... args) {
 			auto &ids = System::get_ids<Component>();
 			auto &components = System::get_components<Component>();
 			auto insert_position = std::lower_bound(begin(ids), end(ids), id);
