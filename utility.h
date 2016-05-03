@@ -64,7 +64,7 @@ namespace Utility {
 			return *this;
 		}
 		Move_only_pointer &operator=(const Move_only_pointer &other) = delete;
-		Move_only_pointer &operator=(T other) {
+		Move_only_pointer &operator=(T *other) {
 			t = other;
 			return *this;
 		}
