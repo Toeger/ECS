@@ -33,21 +33,19 @@ namespace ECS {
 		//get entity handle from a component that has been added to an entity
 		template <class Component>
 		static Entity_handle component_to_entity_handle(const Component &component);
-		//list of systems that modify the world
-		static std::vector<std::function<void()>> &get_systems() {
-			return systems;
-		}
 		//run all systems
 		static void run_systems() {
-			for (auto &f : get_systems()) {
+			for (auto &f : function_pointer_systems) {
+				f();
+			}
+			for (auto &f : function_systems) {
 				f();
 			}
 		}
 		//add a system
 		template <class... Components, class Function>
 		static void add_system(Function &&f) {
-			auto &systems = get_systems();
-			systems.push_back([f = std::move(f)] {
+			add_to_system([f = std::move(f)] {
 				for (auto sit = range<Components...>(); sit; sit.advance()) {
 					f(sit.get_entity_handle());
 				}
@@ -56,8 +54,7 @@ namespace ECS {
 		//add a system which computes something once for all entities
 		template <class... Components, class Function, class PrecomputeFunction>
 		static void add_system(Function &&f, PrecomputeFunction &&pf) {
-			auto &systems = get_systems();
-			systems.push_back([ f = std::move(f), pf = std::move(pf) ] {
+			add_to_system([ f = std::move(f), pf = std::move(pf) ] {
 				auto pc = pf();
 				for (auto sit = range<Components...>(); sit; sit.advance()) {
 					f(sit.get_entity_handle(), pc);
@@ -65,7 +62,13 @@ namespace ECS {
 			});
 		}
 
-			private:
+		//add a system which doesn't loop through components
+		template <class Function>
+		static void add_independent_system(Function &&f) {
+			add_to_system(std::forward<Function>(f));
+		}
+
+		private:
 		//vector to store the components
 		template <class Component>
 		static std::vector<Component> components;
@@ -74,7 +77,17 @@ namespace ECS {
 		static std::vector<Impl::Id> ids;
 		/* TODO: could make components and ids use the same memory since they reallocate at the same time, but this only saves a few memory allocations
 		   and is probably not worth it */
-		static std::vector<std::function<void()>> systems; //could possibly get around using std::function, but it is hard and not worth it
+
+		template <class Function>
+		static std::enable_if_t<std::is_convertible<Function, void (*)()>::value> add_to_system(Function &&f) {
+			function_pointer_systems.push_back(std::forward<Function>(f));
+		}
+		template <class Function>
+		static std::enable_if_t<!std::is_convertible<Function, void (*)()>::value> add_to_system(Function &&f) {
+			function_systems.push_back(std::forward<Function>(f));
+		}
+		static std::vector<void (*)()> function_pointer_systems;
+		static std::vector<std::function<void()>> function_systems;
 	};
 	template <class Component>
 	std::vector<Component> ECS::System::components{};
