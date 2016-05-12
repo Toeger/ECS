@@ -2,7 +2,7 @@
 #define SYSTEMITERATOR_H
 
 #include "entity_handle.h"
-#include "system.h"
+#include "system_base.h"
 
 namespace ECS {
 	/*

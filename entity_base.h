@@ -4,6 +4,7 @@
 #include "ECS/log.h"
 #include "Utility/asserts.h"
 #include "ecs_impl.h"
+#include "system_base.h"
 
 #include <algorithm>
 #include <tuple>
@@ -13,7 +14,7 @@
 
 namespace ECS {
 	//an Entity can have any type of component added to it
-	//note that you cannot add multiple components with the same type, use vector<component> or array<component> to get around that
+	//note that you cannot add multiple components of the same type, use vector<component> or array<component> to get around that
 
 	namespace Impl {
 		struct Entity_base {
@@ -30,9 +31,30 @@ namespace ECS {
 
 			//emplace a component into an Entity
 			template <class Component, class... Args>
-			std::enable_if_t<std::is_pod<Component>::value, Component &> emplace(Args &&... args);
+			std::enable_if_t<std::is_pod<Component>::value, Component &> emplace(Args &&... args) {
+				auto &ids = System::get_ids<Component>();
+				auto &components = System::get_components<Component>();
+				auto insert_position = std::lower_bound(begin(ids), end(ids), id);
+				assert_fast(*insert_position != id); //disallow multiple components of the same type for the same entity
+				auto inserted_component = components.emplace(begin(components) + (insert_position - begin(ids)), Component{std::forward<Args>(args)...});
+				ids.insert(insert_position, id);
+				add_remover<Component>();
+				assert_all(std::is_sorted(begin(ids), end(ids)));
+				return *inserted_component;
+			}
+			//emplace a component into an Entity
 			template <class Component, class... Args>
-			std::enable_if_t<!std::is_pod<Component>::value, Component &> emplace(Args &&... args);
+			std::enable_if_t<!std::is_pod<Component>::value, Component &> emplace(Args &&... args) {
+				auto &ids = System::get_ids<Component>();
+				auto &components = System::get_components<Component>();
+				auto insert_position = std::lower_bound(begin(ids), end(ids), id);
+				assert_fast(*insert_position != id); //disallow multiple components of the same type for the same entity
+				auto inserted_component = components.emplace(begin(components) + (insert_position - begin(ids)), std::forward<Args>(args)...);
+				ids.insert(insert_position, id);
+				add_remover<Component>();
+				assert_all(std::is_sorted(begin(ids), end(ids)));
+				return *inserted_component;
+			}
 			//add a component to an Entity
 			template <class Component>
 			Component &add(Component &&c) {
@@ -40,19 +62,40 @@ namespace ECS {
 			}
 			//get the component of a given type or nullptr if the Entity has no such component
 			template <class Component>
-			Component *get();
+			Component *get() {
+				auto &ids = System::get_ids<Component>();
+				auto id_it = lower_bound(begin(ids), end(ids), id);
+				if (*id_it != id)
+					return nullptr;
+				auto pos = id_it - begin(ids);
+				auto &components = System::get_components<Component>();
+				return &components.at(pos);
+			}
 			//remove a component of a given type, UB if the entity has no such component, test with get to check if the entity has that component
 			template <class Component>
-			void remove();
+			void remove() {
+				auto &ids = System::get_ids<Component>();
+				auto id_pos = lower_bound(begin(ids), end(ids), id);
+				assert_fast(id_pos != end(ids));
+				remove_remover<Component>(id_pos - begin(ids));
+			}
 			//check if the entity is valid. An entity becomes invalid when it is moved from
 			bool is_valid() const {
 				return id != max_id;
 			}
 
-				private:
+			private:
 			//remove a component of the given type and id
 			template <class Component>
-			static void remover(Impl::Id id);
+			static void remover(Impl::Id id) {
+				auto &ids = System::get_ids<Component>();
+				auto id_it = lower_bound(begin(ids), end(ids), id);
+				assert_fast(*id_it == id); //make sure the component to remove exists
+				auto &components = System::get_components<Component>();
+				components.erase(begin(components) + (id_it - begin(ids)));
+				ids.erase(id_it);
+				assert_all(std::is_sorted(begin(ids), end(ids)));
+			}
 
 			template <class Component>
 			void add_remover() {
@@ -101,7 +144,7 @@ namespace ECS {
 					return id > other_id;
 				}
 
-					private:
+				private:
 				//data
 				void (*f)(Impl::Id);
 				Impl::Id id;
@@ -111,77 +154,14 @@ namespace ECS {
 			};
 			//it is important that removers is cleared before the system component vectors are destroyed
 			//it is also necessary to have removers be destroyed after all entities, because entities access removers in the destructor, don't know how to do that without leaking removers
-				protected:
+			protected:
 			static Impl::Id id_counter;
 			Impl::Id id;
 			static std::vector<Remover> removers;
-			friend bool operator<(Impl::Id id, const Entity_base::Remover &r);
+			friend bool operator<(Impl::Id id, const Remover &r);
 		};
 		inline bool operator<(Impl::Id id, const Entity_base::Remover &r) {
 			return r > id;
-		}
-	}
-}
-
-#include "system.h"
-
-namespace ECS {
-	namespace Impl {
-		//emplace a component into an Entity
-		template <class Component, class... Args>
-		std::enable_if_t<std::is_pod<Component>::value, Component &> Entity_base::emplace(Args &&... args) {
-			auto &ids = System::get_ids<Component>();
-			auto &components = System::get_components<Component>();
-			auto insert_position = std::lower_bound(begin(ids), end(ids), id);
-			assert_fast(*insert_position != id); //disallow multiple components of the same type for the same entity
-			auto inserted_component = components.emplace(begin(components) + (insert_position - begin(ids)), Component{std::forward<Args>(args)...});
-			ids.insert(insert_position, id);
-			add_remover<Component>();
-			assert_all(std::is_sorted(begin(ids), end(ids)));
-			return *inserted_component;
-		}
-		//emplace a component into an Entity
-		template <class Component, class... Args>
-		std::enable_if_t<!std::is_pod<Component>::value, Component &> Entity_base::emplace(Args &&... args) {
-			auto &ids = System::get_ids<Component>();
-			auto &components = System::get_components<Component>();
-			auto insert_position = std::lower_bound(begin(ids), end(ids), id);
-			assert_fast(*insert_position != id); //disallow multiple components of the same type for the same entity
-			auto inserted_component = components.emplace(begin(components) + (insert_position - begin(ids)), std::forward<Args>(args)...);
-			ids.insert(insert_position, id);
-			add_remover<Component>();
-			assert_all(std::is_sorted(begin(ids), end(ids)));
-			return *inserted_component;
-		}
-		//get the component of a given type or nullptr if the Entity has no such component
-		template <class Component>
-		Component *Entity_base::get() {
-			auto &ids = System::get_ids<Component>();
-			auto id_it = lower_bound(begin(ids), end(ids), id);
-			if (*id_it != id)
-				return nullptr;
-			auto pos = id_it - begin(ids);
-			auto &components = System::get_components<Component>();
-			return &components.at(pos);
-		}
-		//remove a component of a given type, UB if the entity has no such component, test with get to check if the entity has that component
-		template <class Component>
-		void Entity_base::remove() {
-			auto &ids = System::get_ids<Component>();
-			auto id_pos = lower_bound(begin(ids), end(ids), id);
-			assert_fast(id_pos != end(ids));
-			remove_remover<Component>(id_pos - begin(ids));
-		}
-		//remove a component of the given type and id
-		template <class Component>
-		void Entity_base::remover(Impl::Id id) {
-			auto &ids = System::get_ids<Component>();
-			auto id_it = lower_bound(begin(ids), end(ids), id);
-			assert_fast(*id_it == id); //make sure the component to remove exists
-			auto &components = System::get_components<Component>();
-			components.erase(begin(components) + (id_it - begin(ids)));
-			ids.erase(id_it);
-			assert_all(std::is_sorted(begin(ids), end(ids)));
 		}
 	}
 }
