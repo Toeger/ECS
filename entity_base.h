@@ -1,10 +1,10 @@
 #ifndef ENTITY_BASE_H
 #define ENTITY_BASE_H
 
-#include "ECS/log.h"
-#include "Utility/asserts.h"
+#include "ecs/log.h"
 #include "ecs_impl.h"
 #include "system_base.h"
+#include "utility/asserts.h"
 
 #include <algorithm>
 #include <tuple>

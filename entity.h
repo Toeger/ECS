@@ -1,10 +1,10 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
-#include "ECS/system.h"
-#include "Utility/asserts.h"
+#include "ecs/system.h"
 #include "entity_base.h"
 #include "utility.h"
+#include "utility/asserts.h"
 
 #include <iostream>
 
