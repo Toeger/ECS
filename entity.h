@@ -33,8 +33,8 @@ namespace ECS {
 			assert_all(std::is_sorted(begin(removers), end(removers))); //make sure removers are still sorted
 			auto entity_range = std::equal_range(begin(removers), end(removers), id);
 			removers.erase(entity_range.first, entity_range.second);
-			assert_all(std::is_sorted(begin(removers), end(removers)));                  //make sure removers are still sorted
-			assert_all(std::binary_search(begin(removers), end(removers), id) == false); //make sure we deleted all removers with our id
+			assert_all(std::is_sorted(begin(removers), end(removers)));          //make sure removers are still sorted
+			assert_all(!std::binary_search(begin(removers), end(removers), id)); //make sure we deleted all removers with our id
 		}
 		//clears all components from all entities
 		//must call this at the end of main before destructors of static Entities run, otherwise it may crash due to static initialization order fiasco

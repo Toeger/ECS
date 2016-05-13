@@ -20,7 +20,7 @@
 namespace Log {
 	struct Log_dummy {
 		template <class T>
-		Log_dummy &operator<<(T &&) {
+		Log_dummy &operator<<(T && /*unused*/) {
 			return *this;
 		}
 	};

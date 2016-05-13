@@ -13,7 +13,7 @@ namespace Utility {
 	}
 
 	template <class T, std::size_t size>
-	constexpr std::size_t element_count(const T (&)[size]) {
+	constexpr std::size_t element_count(const T (&/*unused*/)[size]) {
 		return size;
 	}
 

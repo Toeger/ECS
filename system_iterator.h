@@ -18,8 +18,9 @@ namespace ECS {
 		//if no more components are left you are at the end which is testable by converting to bool: true = at the end, false = not at the end
 		//returns the Id of the next entity that has the specified component
 		Impl::Id advance() {
-			if (System::get_ids<T>().at(current_index) == Impl::max_id)
+			if (System::get_ids<T>().at(current_index) == Impl::max_id) {
 				return Impl::max_id;
+			}
 			return advance(System::get_ids<T>().at(current_index) + 1);
 		}
 		//same as regular advance, just that you go to the next target with an Id not smaller than the given target's
@@ -54,7 +55,7 @@ namespace ECS {
 			return System::component_to_entity_handle(**this);
 		}
 
-			private:
+		private:
 		T &operator*() {
 			return System::get_components<T>().at(current_index);
 		}
@@ -74,8 +75,9 @@ namespace ECS {
 			target = t.advance(target);
 			for (auto new_target = rest.advance(target); target != new_target; new_target = rest.advance(target)) {
 				target = t.advance(new_target);
-				if (target == new_target)
+				if (target == new_target) {
 					return target;
+				}
 			}
 			return target;
 		}
@@ -108,7 +110,7 @@ namespace ECS {
 			return t.get_entity_handle();
 		}
 
-			private:
+		private:
 		System_iterator<T> t;
 		System_iterator<Rest...> rest;
 		//std::tuple<Rest...> rest;

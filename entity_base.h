@@ -65,8 +65,9 @@ namespace ECS {
 			Component *get() {
 				auto &ids = System::get_ids<Component>();
 				auto id_it = lower_bound(begin(ids), end(ids), id);
-				if (*id_it != id)
+				if (*id_it != id) {
 					return nullptr;
+				}
 				auto pos = id_it - begin(ids);
 				auto &components = System::get_components<Component>();
 				return &components.at(pos);
@@ -150,7 +151,7 @@ namespace ECS {
 				Impl::Id id;
 				const char *type_name;
 				//empty function to put into removers that have been moved from
-				static inline void remover_dummy(Impl::Id) {}
+				static inline void remover_dummy(Impl::Id /*unused*/) {}
 			};
 			//it is important that removers is cleared before the system component vectors are destroyed
 			//it is also necessary to have removers be destroyed after all entities, because entities access removers in the destructor, don't know how to do that without leaking removers
