@@ -7,11 +7,6 @@
 #include <utility>
 
 namespace Utility {
-	template <class T>
-	std::enable_if_t<std::is_same<T, T &&>::value, const T &> make_const(T &&t) {
-		return t;
-	}
-
 	template <class T, std::size_t size>
 	constexpr std::size_t element_count(const T (&/*unused*/)[size]) {
 		return size;
