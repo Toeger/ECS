@@ -4,6 +4,7 @@
 #include "ecs_impl.h"
 #include "utility.h"
 
+#include <atomic>
 #include <functional>
 #include <type_traits>
 #include <vector>
@@ -69,6 +70,14 @@ namespace ECS {
 		}
 
 		private:
+#ifndef NDEBUG
+		//in debug mode increment the component_state whenever components are removed or added to notice when iterators become invalid
+		template <class T>
+		static std::atomic<unsigned> component_state;
+		template <class H, class... T>
+		friend struct ECS::System_iterator;
+#endif
+
 		//vector to store the components
 		template <class Component>
 		static std::vector<Component> components;
@@ -89,6 +98,10 @@ namespace ECS {
 		static std::vector<void (*)()> function_pointer_systems;
 		static std::vector<std::function<void()>> function_systems;
 	};
+#ifndef NDEBUG
+	template <class T>
+	static std::atomic<unsigned> component_state;
+#endif
 	template <class Component>
 	std::vector<Component> ECS::System::components{};
 	template <class Component>

@@ -84,15 +84,6 @@ namespace ECS {
 		operator bool() {
 			return t;
 		}
-#if 0
-		std::tuple<T&, (Rest &)...>
-		operator *(){
-			return std::tie(*t, (*rest)...);
-		}
-		std::tuple<const T&, const Rest &...> operator *() const{
-			return std::tie(*t, *rest);
-		}
-#endif
 		template <class U>
 		std::enable_if_t<std::is_same<U, T>::value, U &> get() {
 			return t.template get<U>();
@@ -113,7 +104,6 @@ namespace ECS {
 		private:
 		System_iterator<T> t;
 		System_iterator<Rest...> rest;
-		//std::tuple<Rest...> rest;
 	};
 
 	template <class... T>
