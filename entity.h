@@ -23,7 +23,8 @@ namespace ECS {
 	struct Entity : private Impl::Entity_base {
 		Entity()
 			: Entity_base(++id_counter) {}
-		Entity(Entity &&other) noexcept : Entity_base(std::move(other)) {}
+		Entity(Entity &&other) noexcept
+			: Entity_base(std::move(other)) {}
 		Entity &operator=(Entity &&other) noexcept {
 			std::swap(id, other.id);
 			return *this;

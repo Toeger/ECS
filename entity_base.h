@@ -20,7 +20,8 @@ namespace ECS {
 		struct Entity_base {
 			Entity_base(Impl::Id id)
 				: id(id) {}
-			Entity_base(Entity_base &&other) noexcept : id(other.id) {
+			Entity_base(Entity_base &&other) noexcept
+				: id(other.id) {
 				other.id = max_id;
 			}
 			Entity_base &operator=(Entity_base &&other) noexcept {
@@ -107,7 +108,7 @@ namespace ECS {
 			}
 
 			template <class Component>
-			void remove_remover(std::size_t index) {
+			void remove_remover(int index) {
 				removers.erase(begin(removers) + index);
 			}
 
@@ -119,7 +120,10 @@ namespace ECS {
 					, type_name(type_name) {
 					Log::log_debug() << "++++++++Create remover for " << id << " of type " << type_name;
 				}
-				Remover(Remover &&other) noexcept : f(other.f), id(other.id), type_name(other.type_name) {
+				Remover(Remover &&other) noexcept
+					: f(other.f)
+					, id(other.id)
+					, type_name(other.type_name) {
 					other.f = remover_dummy;
 				}
 				Remover &operator=(Remover &&other) noexcept {
