@@ -106,6 +106,6 @@ namespace ECS {
 	std::vector<Component> ECS::System::components{};
 	template <class Component>
 	std::vector<ECS::Impl::Id> ECS::System::ids{ECS::Impl::max_id};
-}
+} // namespace ECS
 
 #endif // SYSTEM_BASE_H

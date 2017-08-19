@@ -8,7 +8,7 @@ namespace ECS {
 	namespace Impl {
 		using Id = long long unsigned int;
 		constexpr Impl::Id max_id = std::numeric_limits<Impl::Id>::max();
-	}
-}
+	} // namespace Impl
+} // namespace ECS
 
 #endif // ECS_IMPL_H

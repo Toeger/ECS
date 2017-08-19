@@ -169,7 +169,7 @@ namespace ECS {
 		inline bool operator<(Impl::Id id, const Entity_base::Remover &r) {
 			return r > id;
 		}
-	}
-}
+	} // namespace Impl
+} // namespace ECS
 
 #endif // ENTITY_BASE_H

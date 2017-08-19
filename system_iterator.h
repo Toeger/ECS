@@ -3,11 +3,12 @@
 
 #include "entity_handle.h"
 #include "system_base.h"
+#include "utility/asserts.h"
 
 #include <iostream>
 
 namespace ECS {
-/*
+	/*
 	Iterator over Entitys with specifiable components.
 	Iterating over Entitys with some specific components goes through all entities with any of the components
 	TODO: It would be more ideomatic but less efficient to use begin and end style iterators.
@@ -18,19 +19,20 @@ namespace ECS {
 	*/
 	template <class First, class... Rest>
 	struct System_iterator {
-		Impl::Id advance() {
-			if (System::get_ids<First>().at(current_indexes[0]) == Impl::max_id) {
-				return Impl::max_id;
-			}
-			return advance(System::get_ids<First>().at(current_indexes[0]) + 1);
+		void advance() {
+			assert_fast(System::get_ids<First>().at(current_indexes[0]) != Impl::max_id);
+			advance(System::get_ids<First>().at(current_indexes[0]) + 1);
 		}
-		Impl::Id advance(Impl::Id target) {
-			auto new_target = target;
-			do {
-				target = new_target;
-				new_target = get_advanced_index(target);
-			} while (new_target != target && new_target != Impl::max_id);
-			return target;
+		void advance(Impl::Id target) {
+			if constexpr (sizeof...(Rest) == 0) {
+				get_advanced_index(target);
+			} else {
+				auto new_target = get_advanced_index(target);
+				while (new_target != target && new_target != Impl::max_id) {
+					target = new_target;
+					new_target = get_advanced_index(target);
+				}
+			}
 		}
 		operator bool() const {
 			return System::get_ids<First>().at(current_indexes[0]) != Impl::max_id;
@@ -70,20 +72,18 @@ namespace ECS {
 			while (ids.at(current_indexes[index]) < target) {
 				current_indexes[index]++;
 			}
-			if
-				constexpr(index + 1 < typelist::size) {
-					return std::max(current_indexes[index], get_advanced_index<index + 1>(current_indexes[index]));
-				}
+			if constexpr (index + 1 < typelist::size) {
+				return std::max(current_indexes[index], get_advanced_index<index + 1>(current_indexes[index]));
+			}
 			return ids.at(current_indexes[index]);
 		}
 		template <std::size_t index = 0>
 		void get_ids(std::array<std::size_t, sizeof...(Rest) + 1> &ids) {
 			using typelist = Utility::Type_list<First, Rest...>;
 			ids[index] = System::get_ids<typelist::nth<index>>(current_indexes[index]);
-			if
-				constexpr(index + 1 < ids.size()) {
-					get_ids<index + 1>(ids);
-				}
+			if constexpr (index + 1 < ids.size()) {
+				get_ids<index + 1>(ids);
+			}
 		}
 		std::array<std::size_t, sizeof...(Rest) + 1> current_indexes{};
 	};
@@ -97,6 +97,6 @@ namespace ECS {
 	bool operator<(const System_iterator<T...> &lhs, std::nullptr_t) {
 		return lhs.current_index != Impl::max_id;
 	}
-}
+} // namespace ECS
 
 #endif // SYSTEMITERATOR_H

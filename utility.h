@@ -84,11 +84,9 @@ namespace Utility {
 		using nth = typename std::tuple_element<n, std::tuple<T...>>::type;
 		template <class U, int i = 0>
 		static constexpr int get_index() {
-			if
-				constexpr(std::is_same<nth<i>, U>::value) {
-					return i;
-				}
-			else {
+			if constexpr (std::is_same<nth<i>, U>::value) {
+				return i;
+			} else {
 				return get_index<U, i + 1>();
 			}
 		}
@@ -118,6 +116,6 @@ namespace Utility {
 #define ON_SCOPE_EXIT_CAT(a, b) ON_SCOPE_EXIT_CAT_(a, b) // force expand
 #define ON_SCOPE_EXIT_CAT_(a, b) a##b                    // actually concatenate
 #define ON_SCOPE_EXIT(CODE) auto ON_SCOPE_EXIT_CAT(ON_SCOPE_EXIT_, __LINE__) = Utility::create_RAII([&]() { CODE })
-}
+} // namespace Utility
 
 #endif // UTILITY

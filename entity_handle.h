@@ -26,6 +26,6 @@ namespace ECS {
 		using ECS::Impl::Entity_base::remove;
 		//could maybe allow adding/emplacing components through a handle, but destroying an entity and using a handle to add components would leak the components
 	};
-}
+} // namespace ECS
 
 #endif // ENTITY_HANDLE_H

@@ -56,6 +56,6 @@ namespace Log {
 		return Log_dummy{};
 #endif
 	}
-};
+}; // namespace Log
 
 #endif // LOG_H

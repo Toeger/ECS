@@ -55,8 +55,8 @@ namespace ECS {
 		using Entity_base::add;
 		using Entity_base::emplace;
 		using Entity_base::get;
-		using Entity_base::remove;
 		using Entity_base::is_valid;
+		using Entity_base::remove;
 	};
 
 	struct Remove_checker {
@@ -90,6 +90,6 @@ namespace ECS {
 		assert_fast(is_valid());
 		System::get_components<Remove_checker>().push_back(Remove_checker{function, std::move(*this)});
 	}
-}
+} // namespace ECS
 
 #endif // ENTITY_H
