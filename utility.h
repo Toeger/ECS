@@ -2,7 +2,10 @@
 #define UTILITY
 
 #include <cmath>
+#include <cxxabi.h>
 #include <limits>
+#include <memory>
+#include <string>
 #include <type_traits>
 #include <utility>
 
@@ -73,6 +76,44 @@ namespace Utility {
 		private:
 		T *t;
 	};
+
+	template <class... T>
+	struct Type_list {
+		static constexpr std::size_t size = sizeof...(T);
+		template <std::size_t n>
+		using nth = typename std::tuple_element<n, std::tuple<T...>>::type;
+		template <class U, int i = 0>
+		static constexpr int get_index() {
+			if
+				constexpr(std::is_same<nth<i>, U>::value) {
+					return i;
+				}
+			else {
+				return get_index<U, i + 1>();
+			}
+		}
+	};
+
+	template <class T>
+	std::string type_name() {
+		std::size_t size{0};
+		int status;
+		std::unique_ptr<char, decltype(free) *> data{abi::__cxa_demangle(typeid(T).name(), nullptr, &size, &status), &free};
+		if (status == 0) {
+			return data.get();
+		}
+		return {};
+	}
+
+	inline std::string type_name(const char *name) {
+		std::size_t size{0};
+		int status;
+		std::unique_ptr<char, decltype(free) *> data{abi::__cxa_demangle(name, nullptr, &size, &status), &free};
+		if (status == 0) {
+			return data.get();
+		}
+		return {};
+	}
 
 #define ON_SCOPE_EXIT_CAT(a, b) ON_SCOPE_EXIT_CAT_(a, b) // force expand
 #define ON_SCOPE_EXIT_CAT_(a, b) a##b                    // actually concatenate

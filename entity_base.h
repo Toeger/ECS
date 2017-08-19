@@ -118,7 +118,7 @@ namespace ECS {
 					: f(f)
 					, id(id)
 					, type_name(type_name) {
-					Log::log_debug() << "++++++++Create remover for " << id << " of type " << type_name;
+					Log::log_debug() << "++++++++Create remover for Entity " << id << " Component " << Utility::type_name(type_name);
 				}
 				Remover(Remover &&other) noexcept
 					: f(other.f)
@@ -135,7 +135,7 @@ namespace ECS {
 				}
 				~Remover() {
 					if (f != remover_dummy) {
-						Log::log_debug() << "--------------------Remove " << id << " of type " << type_name;
+						Log::log_debug() << "--------------------Remove Entity " << id << " Component " << Utility::type_name(type_name);
 						f(id);
 					}
 				}
@@ -158,7 +158,8 @@ namespace ECS {
 				static inline void remover_dummy(Impl::Id /*unused*/) {}
 			};
 			//it is important that removers is cleared before the system component vectors are destroyed
-			//it is also necessary to have removers be destroyed after all entities, because entities access removers in the destructor, don't know how to do that without leaking removers
+			//it is also necessary to have removers be destroyed after all entities, because entities access removers in the destructor, don't know how to do
+			//that without leaking removers
 			protected:
 			static Impl::Id id_counter;
 			Impl::Id id;
