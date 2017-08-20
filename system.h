@@ -24,4 +24,21 @@ ECS::System_iterator<Components...> ECS::System::range() {
 	return si;
 }
 
+template <class... Components>
+ECS::System::Range<Components...> ECS::System::get_range() {
+	return {};
+}
+
+template <class... Components>
+ECS::System_iterator<Components...> ECS::System::Range<Components...>::begin() {
+	System_iterator<Components...> si;
+	si.advance(0);
+	return si;
+}
+
+template <class... Components>
+std::nullptr_t ECS::System::Range<Components...>::end() {
+	return nullptr;
+}
+
 #endif // SYSTEM_H

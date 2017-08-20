@@ -21,7 +21,11 @@ namespace ECS {
 	struct System_iterator {
 		void advance() {
 			assert_fast(System::get_ids<First>().at(current_indexes[0]) != Impl::max_id);
-			advance(System::get_ids<First>().at(current_indexes[0]) + 1);
+			if constexpr (sizeof...(Rest) == 0) {
+				current_indexes[0]++;
+			} else {
+				advance(System::get_ids<First>().at(current_indexes[0]) + 1);
+			}
 		}
 		void advance(Impl::Id target) {
 			if constexpr (sizeof...(Rest) == 0) {
@@ -34,6 +38,14 @@ namespace ECS {
 				}
 			}
 		}
+		decltype(auto) operator*() const {
+			if constexpr (sizeof...(Rest) == 0) { //single component, just return a reference
+				return get<First>();
+			} else { //multiple components, return a tuple of references to the components
+				return std::tie(get<First>(), get<Rest>()...);
+			}
+		}
+
 		operator bool() const {
 			return System::get_ids<First>().at(current_indexes[0]) != Impl::max_id;
 		}
@@ -42,7 +54,7 @@ namespace ECS {
 			return *this;
 		}
 		template <class U>
-		auto &get() {
+		auto &get() const {
 			using typelist = Utility::Type_list<First, Rest...>;
 			constexpr auto index = typelist::template get_index<U>();
 			std::cout << System::get_components<U>().size() << '\n';
@@ -90,12 +102,12 @@ namespace ECS {
 
 	//comparison functions
 	template <class... T>
-	bool operator==(const System_iterator<T...> &lhs, const System_iterator<T...> &rhs) {
-		return lhs.current_index == rhs.current_index; //TODO: we don't check other indexes?
+	bool operator<(const System_iterator<T...> &lhs, std::nullptr_t) {
+		return {lhs};
 	}
 	template <class... T>
-	bool operator<(const System_iterator<T...> &lhs, std::nullptr_t) {
-		return lhs.current_index != Impl::max_id;
+	bool operator!=(const System_iterator<T...> &lhs, std::nullptr_t) {
+		return {lhs};
 	}
 } // namespace ECS
 

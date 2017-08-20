@@ -5,6 +5,7 @@
 #include "utility.h"
 
 #include <atomic>
+#include <cstddef>
 #include <functional>
 #include <type_traits>
 #include <vector>
@@ -20,6 +21,12 @@ namespace ECS {
 		Cannot have multiple components of the same type in one Entity. You can get around that with an array or vector of components.
 	*/
 	struct System {
+		template <class... Components>
+		struct Range {
+			System_iterator<Components...> begin();
+			std::nullptr_t end();
+		};
+
 		template <class Component>
 		static std::vector<Utility::remove_cvr<Component>> &get_components() {
 			return components<Utility::remove_cvr<Component>>;
@@ -31,6 +38,8 @@ namespace ECS {
 		//get a range iterator for a list of components, range<Position, Direction> iterates over all Entities with both a Position and a Direction component
 		template <class... Components>
 		static System_iterator<Components...> range();
+		template <class... Components>
+		static Range<Components...> get_range();
 		//get entity handle from a component that has been added to an entity
 		template <class Component>
 		static Entity_handle component_to_entity_handle(const Component &component);
