@@ -82,12 +82,24 @@ namespace Utility {
 		static constexpr std::size_t size = sizeof...(T);
 		template <std::size_t n>
 		using nth = typename std::tuple_element<n, std::tuple<T...>>::type;
-		template <class U, int i = 0>
+		template <class U, int type_index = 0>
 		static constexpr int get_index() {
-			if constexpr (std::is_same<nth<i>, U>::value) {
-				return i;
+			if constexpr (std::is_same<nth<type_index>, U>::value) {
+				return type_index;
 			} else {
-				return get_index<U, i + 1>();
+				static_assert(type_index + 1 < size, "Type not contained in Type_list");
+				return get_index<U, type_index + 1>();
+			}
+		}
+		template <class U, int type_index = 0>
+		static constexpr bool has() {
+			if constexpr (type_index == size) {
+				return false;
+			} else {
+				if constexpr (std::is_same<nth<type_index>, U>::value) {
+					return true;
+				}
+				return has<U, type_index + 1>();
 			}
 		}
 	};

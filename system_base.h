@@ -95,14 +95,13 @@ namespace ECS {
 		static std::vector<Impl::Id> ids;
 		/* TODO: could make components and ids use the same memory since they reallocate at the same time, but this only saves a few memory allocations
 		   and is probably not worth it */
-
 		template <class Function>
-		static std::enable_if_t<std::is_convertible<Function, void (*)()>::value> add_to_system(Function &&f) {
-			function_pointer_systems.push_back(std::forward<Function>(f));
-		}
-		template <class Function>
-		static std::enable_if_t<!std::is_convertible<Function, void (*)()>::value> add_to_system(Function &&f) {
-			function_systems.push_back(std::forward<Function>(f));
+		static void add_to_system(Function &&f) {
+			if constexpr (std::is_convertible<Function, void (*)()>::value) {
+				function_pointer_systems.push_back(std::forward<Function>(f));
+			} else {
+				function_systems.push_back(std::forward<Function>(f));
+			}
 		}
 		static std::vector<void (*)()> function_pointer_systems;
 		static std::vector<std::function<void()>> function_systems;
