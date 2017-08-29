@@ -18,7 +18,7 @@ namespace ECS {
 
 	namespace Impl {
 		struct Entity_base {
-			Entity_base(Impl::Id id)
+			Entity_base(Impl::Id_t id)
 				: id(id) {}
 			Entity_base(Entity_base &&other) noexcept
 				: id(other.id) {
@@ -81,7 +81,7 @@ namespace ECS {
 			private:
 			//remove a component of the given type and id
 			template <class Component>
-			static void remover(Impl::Id id) {
+			static void remover(Impl::Id_t id) {
 				auto &ids = System::get_ids<Component>();
 				auto id_it = lower_bound(begin(ids), end(ids), id);
 				assert_fast(*id_it == id); //make sure the component to remove exists
@@ -106,7 +106,7 @@ namespace ECS {
 
 			//a struct to remove a component. This is unfortunately necessary, because entities don't know the types of their components
 			struct Remover {
-				Remover(Impl::Id id, void (*f)(Impl::Id), const char *type_name)
+				Remover(Impl::Id_t id, void (*f)(Impl::Id_t), const char *type_name)
 					: f(f)
 					, id(id)
 					, type_name(type_name) {
@@ -134,31 +134,31 @@ namespace ECS {
 				bool operator<(const Remover &other) const {
 					return std::tie(id, f) < std::tie(other.id, other.f);
 				}
-				bool operator<(Impl::Id other_id) const {
+				bool operator<(Impl::Id_t other_id) const {
 					return id < other_id;
 				}
-				bool operator>(Impl::Id other_id) const {
+				bool operator>(Impl::Id_t other_id) const {
 					return id > other_id;
 				}
 
 				private:
 				//data
-				void (*f)(Impl::Id);
-				Impl::Id id;
+				void (*f)(Impl::Id_t);
+				Impl::Id_t id;
 				const char *type_name;
 				//empty function to put into removers that have been moved from
-				static inline void remover_dummy(Impl::Id /*unused*/) {}
+				static inline void remover_dummy(Impl::Id_t /*unused*/) {}
 			};
 			//it is important that removers is cleared before the system component vectors are destroyed
 			//it is also necessary to have removers be destroyed after all entities, because entities access removers in the destructor, don't know how to do
 			//that without leaking removers
 			protected:
-			static Impl::Id id_counter;
-			Impl::Id id;
+			static Impl::Id_t id_counter;
+			Impl::Id_t id;
 			static std::vector<Remover> removers;
-			friend bool operator<(Impl::Id id, const Remover &r);
+			friend bool operator<(Impl::Id_t id, const Remover &r);
 		};
-		inline bool operator<(Impl::Id id, const Entity_base::Remover &r) {
+		inline bool operator<(Impl::Id_t id, const Entity_base::Remover &r) {
 			return r > id;
 		}
 	} // namespace Impl

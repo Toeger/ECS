@@ -32,7 +32,7 @@ namespace ECS {
 			return components<Utility::remove_cvr<Component>>;
 		}
 		template <class Component>
-		static std::vector<Impl::Id> &get_ids() {
+		static std::vector<Impl::Id_t> &get_ids() {
 			return ids<Utility::remove_cvr<Component>>;
 		}
 		//get a range iterator for a list of components, range<Position, Direction> iterates over all Entities with both a Position and a Direction component
@@ -92,7 +92,7 @@ namespace ECS {
 		static std::vector<Component> components;
 		//vector to store the IDs. ids and components are locked, so components<CTYPE>[x] is the component that belongs to entity ids<CTYPE>[x]
 		template <class Component>
-		static std::vector<Impl::Id> ids;
+		static std::vector<Impl::Id_t> ids;
 		/* TODO: could make components and ids use the same memory since they reallocate at the same time, but this only saves a few memory allocations
 		   and is probably not worth it */
 		template <class Function>
@@ -113,7 +113,7 @@ namespace ECS {
 	template <class Component>
 	std::vector<Component> ECS::System::components{};
 	template <class Component>
-	std::vector<ECS::Impl::Id> ECS::System::ids{ECS::Impl::max_id};
+	std::vector<ECS::Impl::Id_t> ECS::System::ids{ECS::Impl::max_id};
 } // namespace ECS
 
 #endif // SYSTEM_BASE_H

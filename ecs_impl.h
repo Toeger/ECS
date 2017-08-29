@@ -6,8 +6,8 @@
 namespace ECS {
 	//every Entity gets a unique Id
 	namespace Impl {
-		using Id = long long unsigned int;
-		constexpr Impl::Id max_id = std::numeric_limits<Impl::Id>::max();
+		using Id_t = long long unsigned int;
+		constexpr Id_t max_id = std::numeric_limits<Id_t>::max();
 	} // namespace Impl
 } // namespace ECS
 

@@ -27,7 +27,7 @@ namespace ECS {
 				advance(System::get_ids<First>().at(current_indexes[0]) + 1);
 			}
 		}
-		void advance(Impl::Id target) {
+		void advance(Impl::Id_t target) {
 			if constexpr (sizeof...(Rest) == 0) {
 				get_advanced_index(target);
 			} else {
@@ -57,8 +57,8 @@ namespace ECS {
 		auto &get() const {
 			using typelist = Utility::Type_list<First, Rest...>;
 			constexpr auto index = typelist::template get_index<U>();
-			std::cout << System::get_components<U>().size() << '\n';
-			std::cout << Utility::type_name<U>() << '\n' << std::flush;
+			Log::log_debug() << System::get_components<U>().size();
+			Log::log_debug() << Utility::type_name<U>();
 			return System::get_components<U>().at(current_indexes[index]);
 		}
 		auto get_ids() const {
@@ -72,15 +72,17 @@ namespace ECS {
 
 		private:
 		template <int index = 0>
-		auto get_advanced_index(Impl::Id target) {
+		auto get_advanced_index(Impl::Id_t target) {
 			using typelist = Utility::Type_list<First, Rest...>;
 			using index_type = typename typelist::template nth<index>;
 			auto &ids = System::get_ids<index_type>();
-			std::cout << ids.size() << '\n';
-			for (const auto &id : ids) {
-				std::cout << id << ' ';
+			{
+				auto logger = Log::log_debug();
+				logger << ids.size() << '\n';
+				for (const auto &id : ids) {
+					logger << id << ' ';
+				}
 			}
-			std::cout << '\n' << std::flush;
 			while (ids.at(current_indexes[index]) < target) {
 				current_indexes[index]++;
 			}
